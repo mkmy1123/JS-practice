@@ -3,8 +3,9 @@
 console.clear
 
 {
-  const year = 2020;
-  const month = 4; // 0スタートなので5月のこと
+  const today = new Date();
+  let year = today.getFullYear();
+  let month = today.getMonth();
 
   function getCalendarHead() {
     const dates = [];
@@ -18,7 +19,6 @@ console.clear
         isDisabled: true,
       });
     }
-
     return dates;
   }
 
@@ -34,6 +34,9 @@ console.clear
       });
     }
 
+    if (year === today.getFullYear() && month == today.getMonth()) {
+      dates[today.getDate() - 1].isToday = true;
+    }
     return dates;
   }
 
@@ -51,7 +54,20 @@ console.clear
     return dates;
   }
 
-  function createCalendar() {
+  function clearCalendar() {
+    const tbody = document.querySelector('tbody');
+  
+    while (tbody.firstChild) {
+      tbody.removeChild(tbody.firstChild);
+    }
+  }
+
+  function renderTitle() {
+    const title = `${year}/${String(month + 1).padStart(2, '0')}`;
+    document.getElementById('title').textContent = title;
+  }
+
+  function renderWeeks() {
     const dates = [
       ...getCalendarHead(),
       ...getCalendarBody(),
@@ -59,16 +75,15 @@ console.clear
     ];
     const weeks = [];
     const weeksCount = dates.length / 7;
-
+  
     for (let i = 0; i < weeksCount; i++) {
       weeks.push(dates.splice(0, 7));
     }
-
     weeks.forEach(week => {
       const tr = document.createElement('tr');
       week.forEach(date => {
         const td = document.createElement('td');
-
+  
         td.textContent = date.date;
         if (date.isToday) {
           td.classList.add('today');
@@ -76,12 +91,44 @@ console.clear
         if (date.isDisabled) {
           td.classList.add('disabled');
         }
-
+  
         tr.appendChild(td);
       });
       document.querySelector('tbody').appendChild(tr);
-    })
+    });
   }
 
+  function createCalendar() {
+    clearCalendar();
+    renderTitle();
+    renderWeeks();
+  }
+
+  document.getElementById('prev').addEventListener('click', () => {
+    month--;
+    if (month < 0) {
+      year--;
+      month = 11;
+    }
+
+    createCalendar();
+  });
+
+  document.getElementById('next').addEventListener('click', () => {
+    month++;
+    if (month > 11) {
+      year++;
+      month = 0;
+    }
+
+    createCalendar();
+  });
+
+  document.getElementById('today').addEventListener('click', () => {
+    year = today.getFullYear();
+    month = today.getMonth();
+
+    createCalendar();
+  });
   createCalendar();
 }
